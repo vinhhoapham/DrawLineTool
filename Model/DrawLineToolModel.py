@@ -17,12 +17,12 @@ class DrawLineToolModel:
         self.settings = Settings()
         self.output_processed_folder = None
 
-    def load_directory(self, directory):
+    def load_directory(self, directory,progress_callback=None):
         self.current_dir = directory
         self.files = [file for file in os.listdir(directory) if file.endswith((".JPG", ".jpeg"))]
         self.current_file_index = 0
         if self.settings.get_option("run_auto_detection"):
-            self.analysis, self.output_processed_folder = auto_detection(directory)
+            self.analysis, self.output_processed_folder = auto_detection(directory, progress_callback)
         else:
             last_segment = get_last_segment_of_path(directory)
             self.output_processed_folder = f"{directory}/{last_segment}_processed"

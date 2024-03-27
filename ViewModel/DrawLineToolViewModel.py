@@ -27,8 +27,8 @@ class DrawLineToolViewModel:
         self.is_displaying_original_image = True
         return self.model.get_current_image()
 
-    def load_directory(self, directory):
-        self.model.load_directory(directory)
+    def load_directory(self, directory, progress_callback=None):
+        self.model.load_directory(directory, progress_callback)
         self.folder_loaded = True
         self.is_object_lighter = False
         return self.get_image_to_display()

@@ -5,7 +5,7 @@ from sklearn.cluster import KMeans
 import os
 from pathlib import Path
 import pandas as pd
-from scipy.io import savemat
+import time
 
 
 def get_last_segment_of_path(path):
@@ -181,17 +181,30 @@ def process_image(image_path, diameter=236):
     return original_color_image, clustered_image, line_angle, contrast, blurriness
 
 
-def auto_detection(folder_path):
+def auto_detection(folder_path, progress_callback=None):
+    start_time = time.time()
+
     last_segment = get_last_segment_of_path(folder_path)
     output_folder = f"{folder_path}/{last_segment}_processed"
     os.makedirs(output_folder, exist_ok=True)
 
     results = []
     image_files = [file for file in os.listdir(folder_path) if file.endswith((".JPG", ".jpeg"))]
-    for filename in image_files:
+    total_files = len(image_files)
+    for index, filename in enumerate(image_files):
         image_path = os.path.join(folder_path, filename)
         processed_image, clustered_image, angle, contrast, blurriness = process_image(image_path)
-        print(f"processing {filename}")
+
+        if progress_callback:
+            progress = (index + 1) / total_files * 100
+            progress_callback(progress)
+
+        elapsed_time = time.time() - start_time
+        estimated_total_time = elapsed_time / (index + 1) * total_files
+        remaining_time = estimated_total_time - elapsed_time
+
+        print(f"Processing {filename} ({index + 1}/{total_files}). Progress: {progress:.2f}%, Estimated remaining time: {remaining_time:.2f} seconds")
+
         if angle is not None and contrast is not None:
             results.append({
                 'file_name': filename,
@@ -204,6 +217,5 @@ def auto_detection(folder_path):
         processed_image_path = os.path.join(output_folder, f"{Path(filename).stem}_processed.jpg")
         cv2.imwrite(processed_image_path, processed_image)
 
-    # Convert results to a DataFrame and save as Excel file
     results_dataframe = pd.DataFrame(results)
     return results_dataframe, output_folder

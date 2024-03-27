@@ -1,4 +1,4 @@
-from tkinter import Frame, Label, Button, font
+from tkinter import Frame, Label, Button, font, ttk
 
 
 class BottomMenu(Frame):
@@ -14,6 +14,9 @@ class BottomMenu(Frame):
         self.status_label = Label(self, text=status_text, font=modern_font, bg='black', fg='white')  # Set label colors
         self.status_label.pack(side="left", padx=10, pady=10)
 
+        self.progress_bar = ttk.Progressbar(self, orient="horizontal", length=300, mode="determinate")
+        self.progress_bar.pack(side="left", pady=10)
+
         # Previous Button
         self.prev_button = Button(self, text="←", command=prev_callback, **button_style)
         self.prev_button.pack(side="right", padx=10, pady=10)
@@ -27,3 +30,7 @@ class BottomMenu(Frame):
 
     def update_status(self, new_status):
         self.status_label.config(text=new_status)
+
+    def update_progress(self, progress):
+        self.progress_bar['value'] = progress
+        self.master.update_idletasks()

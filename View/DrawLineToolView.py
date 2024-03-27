@@ -1,9 +1,10 @@
-from tkinter import Tk, filedialog, messagebox
+from tkinter import Tk, filedialog, messagebox, ttk
 from .ControlPanelComponent import ControlPanelComponent
 from .BottomMenu import BottomMenu
 from .ImageCanvas import ImageCanvas
 from .SettingsPopupComponent import SettingsPopupComponent
-
+import threading
+import time
 
 class MainView:
     def __init__(self, master, view_model):
@@ -18,7 +19,6 @@ class MainView:
         self.bottom_menu = BottomMenu(master, self.prev_image, self.next_image)
         self.bottom_menu.pack(side="bottom", fill="x")
 
-        # ImageCanvas now takes a callback and the view model
         self.image_canvas = ImageCanvas(master, self.on_image_click, self.view_model)
         self.image_canvas.pack(expand=True, fill="both")
 
@@ -28,17 +28,21 @@ class MainView:
 
     def load_folder(self):
         directory = filedialog.askdirectory()
-        self.control_panel.update_checkbox_state(self.view_model.is_object_lighter)
-        if self.view_model.get_option("run_auto_detection"):
-            self.update_status("Running auto line detection script")
-
-        if directory:
-            image = self.view_model.load_directory(directory)
-            self.image_canvas.display_image(image)
-            self.update_status()
-        else:
+        if not directory:
             self.update_status("No folder loaded")
             messagebox.showwarning("Invalid Selection", "No folder was selected. Please select a valid folder.")
+            return
+
+        self.control_panel.update_checkbox_state(self.view_model.is_object_lighter)
+        self.update_status("Loading...")
+
+        if self.view_model.get_option("run_auto_detection"):
+            # Use threading to run the auto-detection process
+            threading.Thread(target=self.run_auto_detection, args=(directory,), daemon=True).start()
+            self.finalize_directory_loading()
+        else:
+            # Load directory without auto-detection
+            self.load_directory_without_auto_detection(directory)
 
     def export_analysis(self):
         try:
@@ -96,3 +100,33 @@ class MainView:
     def clear_clicked_points(self, event=None):
         self.view_model.reset_clicked_points()
         self.image_canvas.clear_canvas_elements()
+
+    def run_auto_detection(self, directory):
+        self.start_time = time.time()
+        self.view_model.load_directory(directory, self.update_progress)
+        self.update_progress(100)
+
+    def load_directory_without_auto_detection(self, directory):
+        try:
+            self.reset_view_state()
+            self.view_model.load_directory(directory)
+            self.finalize_directory_loading()
+        except Exception as e:
+            messagebox.showerror("Error", str(e))
+
+    def finalize_directory_loading(self):
+        image = self.view_model.get_image_to_display()
+        self.image_canvas.display_image(image)
+        self.update_status()
+
+    def update_progress(self, progress):
+        current_time = time.time()
+        elapsed_time = current_time - self.start_time
+        total_estimated_time = elapsed_time / progress * 100
+        remaining_time = total_estimated_time - elapsed_time
+
+        formatted_time = f"{remaining_time // 60:.0f}m {remaining_time % 60:.0f}s"
+        status_message = f"Processing - {progress:.2f}% - Remaining: {formatted_time}"
+
+        self.bottom_menu.update_progress(progress)
+        self.bottom_menu.update_status(status_message)
