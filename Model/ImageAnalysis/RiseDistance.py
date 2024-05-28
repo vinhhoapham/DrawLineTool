@@ -33,15 +33,12 @@ def find_closest_distance_within_range(distances, pixels, percentile, range_widt
     threshold_value = np.percentile(pixels, percentile)
     low, high = threshold_value * (1 - range_width), threshold_value * (1 + range_width)
 
-    # Initialize variables to store the minimum distance and the corresponding threshold distance
     min_dist = float('inf')
     closest_distance = 0
 
-    # Custom function to check if pixel is within range
     def is_within_range(value, low, high):
         return low <= value <= high
 
-    # Loop through each distance and update the closest distance to 0 within the specified range
     for distance, pixel in zip(distances, pixels):
         if is_within_range(pixel, low, high) and abs(distance) < min_dist:
             min_dist = abs(distance)
@@ -52,13 +49,13 @@ def find_closest_distance_within_range(distances, pixels, percentile, range_widt
 
 def rise_distance(image_array, line, radius):
     esf = edge_spread_function(image_array, line, radius)
-    distances, pixels = zip(*esf)  # Unpack distance and pixel values
+    distances, pixels = zip(*esf)
     distances = np.array(distances)
     pixels = np.array(pixels)
     low_threshold = 25
     high_threshold = 75
     tolerance_range = 0.03
-    # Using the new function to find the closest distances within the specified ranges
+
     low_threshold_distance = find_closest_distance_within_range(distances, pixels, low_threshold, tolerance_range)
     high_threshold_distance = find_closest_distance_within_range(distances, pixels, high_threshold, tolerance_range)
 
