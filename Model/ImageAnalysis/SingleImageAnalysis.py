@@ -39,7 +39,7 @@ def calculate_image_property_from_cartesian_coordinate(image, line_points, mid_x
 
     # Adjust the angle based on the sides of the object (darker side)
 
-    blurriness = measure_blurriness(side1_pixels + side2_pixels)
+    blurriness = measure_blurriness(image_array=image, line=(slope, intercept), diameter=diameter)
     if is_horizontal:
         if darker_side_on_left_or_above:
             if (not is_object_lighter) and (angle > 90):

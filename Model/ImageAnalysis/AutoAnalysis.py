@@ -6,7 +6,7 @@ import os
 from pathlib import Path
 import pandas as pd
 import time
-
+from .RiseDistance import rise_distance
 
 def get_last_segment_of_path(path):
     return Path(path).name
@@ -61,11 +61,9 @@ def find_closest_line_to_center(lines, center):
     return closest_line
 
 
-def measure_blurriness(image_array):
-    image_array = np.array(image_array)
-    mu = np.mean(image_array)
-    sharpness_measurement = np.sum((image_array - mu) ** 2) / (mu * len(image_array))
-    return sharpness_measurement
+def measure_blurriness(image_array, line, diameter):
+    bluriness_measurement = rise_distance(image_array, line, diameter // 2 )
+    return bluriness_measurement
 
 
 def calculate_image_property(image, line, mid_x, mid_y, diameter, debug_mode=False):
@@ -132,8 +130,9 @@ def calculate_image_property(image, line, mid_x, mid_y, diameter, debug_mode=Fal
                 line_angle += 180
             adjusted_angle = abs(line_angle + 90)
 
-    pixels_inside_circle = side1_pixels + side2_pixels
-    blurriness = measure_blurriness(pixels_inside_circle)
+    slope = abs(dy / dx) if dx != 0 else float('inf')
+    intercept = y1 - slope * x1
+    blurriness = measure_blurriness(image, line=(slope, intercept), diameter=diameter)
     return adjusted_angle, contrast, blurriness
 
 
@@ -203,7 +202,6 @@ def auto_detection(folder_path, progress_callback=None):
         estimated_total_time = elapsed_time / (index + 1) * total_files
         remaining_time = estimated_total_time - elapsed_time
 
-        print(f"Processing {filename} ({index + 1}/{total_files}). Progress: {progress:.2f}%, Estimated remaining time: {remaining_time:.2f} seconds")
 
         if angle is not None and contrast is not None:
             results.append({
