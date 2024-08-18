@@ -1,17 +1,12 @@
 # Ignore everything
 *
 
-# But not .py files
+# But not .md and .py files
+!*.md
 !*.py
 
-# And not README.md
-!README.md
+# Ignore venv folder
+venv/
 
-# Even if they are in subdirectories
-!*/
-
-# But still ignore certain patterns
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
+# Don't ignore .gitignore itself
+!.gitignore
