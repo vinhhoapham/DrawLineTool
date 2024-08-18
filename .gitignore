@@ -1,0 +1,17 @@
+# Ignore everything
+*
+
+# But not .py files
+!*.py
+
+# And not README.md
+!README.md
+
+# Even if they are in subdirectories
+!*/
+
+# But still ignore certain patterns
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
