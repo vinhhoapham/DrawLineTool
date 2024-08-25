@@ -79,10 +79,10 @@ To run the Draw Line Tool:
 
 2. Navigate to the project directory.
 
-3. Run the following command:
+3. Run the following command in the folder/directory where you install this repo:
 
    ```
-   python App.py
+   python src/App.py
    ```
 
 4. The application window should open, and you can begin using the Draw Line Tool.
@@ -162,21 +162,21 @@ This method provides a quantitative measure of image sharpness, allowing for obj
 
 The blurriness measurement uses a specific mathematical function to fit the Edge Spread Function. The form of this fitting function in LaTeX notation is:
 
-```latex
-f(x) = a_1 \cdot \text{erf}\left(\frac{x - a_3}{\sigma\sqrt{2}}\right) + a_2
-```
+
+$$ f(x) = a_1 \cdot \text{erf}\left(\frac{x - a_3}{\sigma\sqrt{2}}\right) + a_2 $$
+
 
 Where:
-- f(x) is the intensity value at position $x$
-- \text{erf} is the error function
-- a_1 is the amplitude of the edge transition
-- a_2 is the offset (baseline intensity)
-- a_3 is the position of the edge center
-- \sigma (sigma) is the standard deviation of the edge spread, which is used as the measure of blurriness
+- $f(x)$ is the intensity value at position $x$
+- $\text{erf}$ is the error function
+- $a_1$ is the amplitude of the edge transition
+- $a_2$ is the offset (baseline intensity)
+- $a_3$ is the position of the edge center
+- $\sigma$ (sigma) is the standard deviation of the edge spread, which is used as the measure of blurriness
 
-The sigma parameter is particularly important:
-- A smaller sigma indicates a sharper edge (less blurry)
-- A larger sigma indicates a more gradual transition (more blurry)
+The $\sigma$ parameter is particularly important:
+- A smaller $\sigma$ indicates a sharper edge (less blurry)
+- A larger $\sigma$ indicates a more gradual transition (more blurry)
 
 This function is fitted to the observed edge data using curve fitting techniques (specifically, the `curve_fit` function from SciPy). The resulting $\sigma$ value provides a quantitative measure of the edge sharpness, and thus, the image blurriness.
 
@@ -191,10 +191,8 @@ Understanding this function can help users interpret the blurriness measurements
 
 The error function $\text{erf}(x)$ used in this equation is defined as:
 
-```latex
-\text{erf}(x) = \frac{2}{\sqrt{\pi}} \int_0^x e^{-t^2} dt
-```
+
+$$ \text{erf}(x) = \frac{2}{\sqrt{\pi}} \int_0^x e^{-t^2} dt $$
+
 
 This integral form of the error function represents the cumulative distribution function of a Gaussian distribution, which closely models the intensity transition across an edge in an image.
-
-By using these advanced algorithms for line detection and blurriness measurement, the Draw Line Tool provides accurate and consistent analysis of circular sample images.
