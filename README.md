@@ -125,24 +125,17 @@ The automatic line detection algorithm comprises of the following steps:
    - The circular region of interest is cropped from the image.
 
 2. **K-means Clustering**:
-   - The pixels in the circular region are clustered into two groups using K-means clustering.
-   - This separates the image into light and dark regions, effectively binarizing it.
+   - The pixels in the circular region are clustered into two groups using K-means clustering. 
+   - One group is assigned to have pixel value of 0, while the other has value of 255
 
 3. **Edge Detection**:
    - Canny edge detection is applied to the binarized image to identify edges.
 
 4. **Hough Transform**:
    - The Hough transform is used to detect lines in the edge image.
-   - This transform can identify lines even if they are partially obscured or broken.
 
 5. **Line Selection**:
    - The detected lines are filtered and the line closest to the center of the circle is selected.
-   - This is typically the most prominent line in the sample.
-
-6. **Angle and Contrast Calculation**:
-   - The angle of the selected line is calculated relative to the horizontal.
-   - Contrast is measured by comparing pixel intensities on either side of the line.
-
 
 ### Blurriness Measurement
 
@@ -150,7 +143,7 @@ The blurriness measurement in this tool is based on the concept of the Edge Spre
 
 1. **Edge Spread Function (ESF)**:
    - The ESF is created by plotting the intensity values of pixels perpendicular to the detected line.
-   - This function represents the transition from dark to light (or vice versa) across the edge.
+   - This function represents the transition between two regions across the edge.
 
 2. **Line Fitting**:
    - An error function (erf) is fitted to the ESF using curve fitting techniques.
