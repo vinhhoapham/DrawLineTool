@@ -1,7 +1,7 @@
 import numpy as np
 from PIL import Image
 import cv2
-from .AutoAnalysis import measure_blurriness
+from .RiseDistance import rise_distance
 
 
 def calculate_image_property_from_cartesian_coordinate(image, line_points, mid_x, mid_y, diameter, is_object_lighter):
@@ -11,7 +11,7 @@ def calculate_image_property_from_cartesian_coordinate(image, line_points, mid_x
 
     is_horizontal = abs(dx) > abs(dy)
 
-    slope = abs(dy / dx) if dx != 0 else float('inf')
+    slope = dy / dx if dx != 0 else float('inf')
     intercept = y1 - slope * x1
 
     radius = diameter // 2
@@ -35,37 +35,24 @@ def calculate_image_property_from_cartesian_coordinate(image, line_points, mid_x
 
     angle = np.arctan(slope) * 180 / np.pi
     darker_side_on_left_or_above = p1 > p2
-    adjusted_angle = angle if angle > 0 else 360 + angle
 
-    # Adjust the angle based on the sides of the object (darker side)
+    blurriness = rise_distance(image_array=image, line=(slope, intercept), radius=diameter // 2)
+    darker_side_on_left_or_above = (darker_side_on_left_or_above == (not is_object_lighter))
 
-    blurriness = measure_blurriness(image_array=image, line=(slope, intercept), diameter=diameter)
     if is_horizontal:
-        if darker_side_on_left_or_above:
-            if (not is_object_lighter) and (angle > 90):
-                adjusted_angle = (angle - 180) % 360
-            if is_object_lighter and (angle < 90):
-                adjusted_angle = (angle + 180) % 360
-            print("Above")
-        else:
-            if (not is_object_lighter) and (angle < 90):
-                adjusted_angle = (angle + 180) % 360
-            if is_object_lighter and (angle > 90):
-                adjusted_angle = (angle - 180) % 360
-            print("Below")
+        base_angle = 360 if darker_side_on_left_or_above else 180
+        adjusted_angle = (base_angle - angle) % 360
     else:
         if darker_side_on_left_or_above:
-            print(f"left")
-            if (angle > 180) and (not is_object_lighter):
-                adjusted_angle -= 90
-            if (angle < 180) and is_object_lighter:
-                adjusted_angle += 180
+            if angle < 0:
+                adjusted_angle = abs(angle)
+            else:
+                adjusted_angle = 90 + abs(90 - angle)
         else:
-            if angle < 180 and (not is_object_lighter):
-                adjusted_angle += 180
-            if (angle > 180) and is_object_lighter:
-                adjusted_angle -= 90
-            print(f"right")
+            if angle < 0:
+                adjusted_angle = 270 - abs(90 - abs(angle))
+            else:
+                adjusted_angle = 270 + abs(90 - angle)
 
     return adjusted_angle, contrast, blurriness
 
@@ -77,11 +64,12 @@ class SingleImageAnalysis:
         self.diameter = diameter
         self.is_object_lighter = is_object_lighter
 
-    def draw_line_and_text_from_cartesian_coordinate(self, image, line_points, angle, contrast, blurriness, color=(0, 0, 255)):
+    def draw_line_and_text_from_cartesian_coordinate(self, image, line_points, angle, contrast, blurriness,
+                                                     color=(0, 0, 255)):
         (x1, y1), (x2, y2) = line_points
         cv2.line(image, (x1, y1), (x2, y2), color, 2)
         mid_x, mid_y = self.image.size[0] // 2, self.image.size[1] // 2
-        cv2.circle(image, (mid_x, mid_y), self.diameter//2, (0, 255, 0), 2)
+        cv2.circle(image, (mid_x, mid_y), self.diameter // 2, (0, 255, 0), 2)
         info_text = f'Angle: {angle:.3f} deg, Contrast: {contrast:.3f}, Blurriness: {blurriness:.5f}'
         cv2.putText(image, info_text, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (147, 155, 26), 2)
 
@@ -91,8 +79,10 @@ class SingleImageAnalysis:
         mid_x, mid_y = line_overlay_image.size[0] // 2, line_overlay_image.size[1] // 2
 
         # Calculate properties using Cartesian coordinates
-        angle, contrast, blurriness = calculate_image_property_from_cartesian_coordinate(line_overlay_image_np, self.line_points,
-                                                                                         mid_x, mid_y, self.diameter, self.is_object_lighter)
+        angle, contrast, blurriness = calculate_image_property_from_cartesian_coordinate(line_overlay_image_np,
+                                                                                         self.line_points,
+                                                                                         mid_x, mid_y, self.diameter,
+                                                                                         self.is_object_lighter)
 
         line_overlay_image_color = cv2.cvtColor(line_overlay_image_np, cv2.COLOR_BGR2RGB)
         self.draw_line_and_text_from_cartesian_coordinate(line_overlay_image_color, self.line_points, angle,
@@ -100,5 +90,3 @@ class SingleImageAnalysis:
 
         line_overlay_image_pil = Image.fromarray(line_overlay_image_color)
         return contrast, angle, blurriness, line_overlay_image_pil
-
-

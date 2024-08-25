@@ -5,8 +5,7 @@ from sklearn.cluster import KMeans
 import os
 from pathlib import Path
 import time
-from .RiseDistance import rise_distance
-
+from .SingleImageAnalysis import calculate_image_property_from_cartesian_coordinate
 
 def get_last_segment_of_path(path):
     return Path(path).name
@@ -61,16 +60,9 @@ def find_closest_line_to_center(lines, center):
     return closest_line
 
 
-def measure_blurriness(image_array, line, diameter):
-    bluriness_measurement = rise_distance(image_array, line, diameter // 2)
-    return bluriness_measurement
-
-
-def calculate_image_property(image, line, mid_x, mid_y, diameter, debug_mode=False):
+def calculate_image_property(image, line, mid_x, mid_y, diameter):
     rho, theta = line[0]
     a, b = np.cos(theta), np.sin(theta)
-    side1_pixels = []
-    side2_pixels = []
     radius = diameter // 2
     x0 = a * rho + mid_x - radius
     y0 = b * rho + mid_y - radius
@@ -78,65 +70,15 @@ def calculate_image_property(image, line, mid_x, mid_y, diameter, debug_mode=Fal
     y1 = int(y0 + 10000 * (a))
     x2 = int(x0 - 10000 * (-b))
     y2 = int(y0 - 10000 * (a))
-    dx = abs(x1 - x2)
-    dy = abs(y1 - y2)
-    is_horizontal = dx > dy
-    A = np.array([[x1, 1], [x2, 1]]) if is_horizontal else np.array([[y1, 1], [y2, 1]])
-    B = np.array([y1, y2]) if is_horizontal else np.array([x1, x2])
-
-    slope, intercept = np.linalg.solve(A, B)
-
-    for x in range(mid_x - radius, mid_x + radius):
-        for y in range(mid_y - radius, mid_y + radius):
-            if (x - mid_x) ** 2 + (y - mid_y) ** 2 < radius ** 2:
-                line = slope * x + intercept if is_horizontal else slope * y + intercept
-                distance = (y - line) if is_horizontal else (x - line)
-                pixel_value = image[y, x]
-                if distance >= 0:
-                    side1_pixels.append(pixel_value)
-                elif distance < 0:
-                    side2_pixels.append(pixel_value)
-
-    p1 = np.mean(side1_pixels) if side1_pixels else 0
-    p2 = np.mean(side2_pixels) if side2_pixels else 0
-    contrast = abs((p2 - p1) / (p2 + p1)) if (p2 + p1) != 0 else 0
-    darker_side_on_left_or_above = p1 > p2
-
-    line_angle = theta * 180 / np.pi
-    if debug_mode:
-        print(f"Line angle: {line_angle}")
-    adjusted_angle = line_angle
-
-    # Adjust the angle based on the sides of the object (darker side)
-
-    if is_horizontal:
-        if darker_side_on_left_or_above:
-            if debug_mode:
-                print(f"Darker side is above, line angle: {line_angle}")
-            adjusted_angle = abs(90 - line_angle)
-        else:
-            if debug_mode:
-                print(f"Darker side is below, line angle: {line_angle}")
-            adjusted_angle = abs(270 - line_angle)
-    else:
-        if darker_side_on_left_or_above:
-            if debug_mode:
-                print(f"Darker side is on the left, line angle: {line_angle}")
-            adjusted_angle = abs(line_angle - 90)
-        else:
-            if debug_mode:
-                print(f"Darker side is on the right, line angle: {line_angle}")
-            if line_angle < 90:
-                line_angle += 180
-            adjusted_angle = abs(line_angle + 90)
-
-    slope = abs(dy / dx) if dx != 0 else float('inf')
-    intercept = y1 - slope * x1
-    blurriness = measure_blurriness(image, line=(slope, intercept), diameter=diameter)
+    point1, point2 = (x1, y1), (x2,y2)
+    adjusted_angle, contrast, blurriness = calculate_image_property_from_cartesian_coordinate(
+        image=image, line_points=(point1, point2),
+        mid_x = mid_x, mid_y=mid_y, diameter=diameter, is_object_lighter= False
+    )
     return adjusted_angle, contrast, blurriness
 
 
-def draw_line_and_text(image, line, angle, contrast, blurriness, mid_x, mid_y, diameter, color=(0, 0, 255)):
+def draw_line_and_text_from_auto_detection(image, line, angle, contrast, blurriness, mid_x, mid_y, diameter, color=(0, 0, 255)):
     if line is not None:
         rho, theta = line[0]
         a, b = np.cos(theta), np.sin(theta)
@@ -170,12 +112,11 @@ def process_image(image_path, diameter=236):
     if closest_line is not None:
         line_angle, contrast, blurriness = calculate_image_property(original_image, closest_line, mid_x, mid_y,
                                                                     diameter)
-        draw_line_and_text(original_color_image, closest_line, line_angle,
+        draw_line_and_text_from_auto_detection(original_color_image, closest_line, line_angle,
                            contrast, blurriness, mid_x, mid_y, diameter)
-        draw_line_and_text(clustered_image, closest_line, line_angle, contrast, blurriness,
+        draw_line_and_text_from_auto_detection(clustered_image, closest_line, line_angle, contrast, blurriness,
                            radius, radius, diameter, color=(155, 155, 155))
 
-    # Draw the circle at the center of the original color image with the diameter
     cv2.circle(original_color_image, (mid_x, mid_y), radius, (0, 255, 0), 2)
 
     return original_color_image, clustered_image, line_angle, contrast, blurriness

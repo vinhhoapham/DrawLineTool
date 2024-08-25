@@ -6,7 +6,7 @@
 !*.py
 
 # Ignore venv folder
-venv/
+./venv
 
 # Don't ignore .gitignore itself
 !.gitignore

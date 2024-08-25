@@ -41,11 +41,12 @@ def edge_model(x, a1, a3, sigma, a2):
 
 
 def rise_distance(image_array, line, radius):
+    slope, intercept = line
     esf = edge_spread_function(image_array, line, radius)
     distances, pixels = zip(*esf)
     distances = np.array(distances)
     pixels = np.array(pixels)
-
-    initial_guesses = [np.max(pixels),np.mean(distances), 10, 10]
-    popt, pcov = curve_fit(edge_model, distances, pixels, p0=initial_guesses, ftol=5e-5, xtol=5e-5)
-    return abs(popt[2])
+    initial_guesses = [np.max(pixels), np.mean(distances), 10, 10]
+    popt, _ = curve_fit(edge_model, distances, pixels, p0=initial_guesses, ftol=5e-5, xtol=5e-5)
+    sigma = abs(popt[2])
+    return sigma
