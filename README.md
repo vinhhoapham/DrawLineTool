@@ -9,9 +9,9 @@
 5. [Running the Program](#running-the-program)
 6. [Troubleshooting](#troubleshooting)
 7. [Technical Details](#technical-details)
-   7.1. [Line Detection Algorithm](#line-detection-algorithm)
-   7.2. [Blurriness Measurement](#blurriness-measurement)
-      7.2.1. [Edge Spread Function (ESF) Fitting](#edge-spread-function-esf-fitting)
+   1. [Line Detection Algorithm](#line-detection-algorithm)
+   2. [Blurriness Measurement](#blurriness-measurement)
+      1. [Edge Spread Function (ESF) Fitting](#edge-spread-function-esf-fitting)
 
 ## How to Use the Program
 
