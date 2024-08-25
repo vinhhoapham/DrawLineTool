@@ -1,5 +1,18 @@
 # Draw Line Tool
 
+# Table of Contents
+
+1. [Draw Line Tool](#draw-line-tool)
+2. [How to Use the Program](#how-to-use-the-program)
+3. [File Structure](#file-structure)
+4. [Installation](#installation)
+5. [Running the Program](#running-the-program)
+6. [Troubleshooting](#troubleshooting)
+7. [Technical Details](#technical-details)
+   7.1. [Line Detection Algorithm](#line-detection-algorithm)
+   7.2. [Blurriness Measurement](#blurriness-measurement)
+      7.2.1. [Edge Spread Function (ESF) Fitting](#edge-spread-function-esf-fitting)
+
 ## How to Use the Program
 
 The Draw Line Tool is a Python application for analyzing images, particularly useful for examining the contrast and angle of lines in circular samples. Here's how to use it:
@@ -105,7 +118,7 @@ For any additional issues or feature requests, please open an issue on the proje
 
 ### Line Detection Algorithm
 
-The automatic line detection algorithm uses a combination of image processing techniques to identify the main line in circular sample images. Here's an overview of the process:
+The automatic line detection algorithm comprises of the following steps: 
 
 1. **Preprocessing**: 
    - The image is converted to grayscale and blurred using Gaussian blur to reduce noise.
@@ -130,7 +143,6 @@ The automatic line detection algorithm uses a combination of image processing te
    - The angle of the selected line is calculated relative to the horizontal.
    - Contrast is measured by comparing pixel intensities on either side of the line.
 
-This algorithm allows for robust automatic detection of the main line in circular sample images, even with varying lighting conditions and sample orientations.
 
 ### Blurriness Measurement
 
