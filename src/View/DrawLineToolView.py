@@ -29,6 +29,7 @@ class MainView:
 
     def update_image_info(self):
         image_info = self.view_model.get_current_image_info()
+        print(f'Test')
         self.control_panel.update_image_info(**image_info)
 
     def load_folder(self):
