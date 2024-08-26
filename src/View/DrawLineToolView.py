@@ -6,6 +6,7 @@ from .SettingsPopupComponent import SettingsPopupComponent
 import threading
 import time
 
+
 class MainView:
     def __init__(self, master, view_model):
         self.master = master
@@ -26,6 +27,10 @@ class MainView:
         self.master.bind('<Right>', self.next_image)
         self.master.bind('<Escape>', self.clear_clicked_points)
 
+    def update_image_info(self):
+        image_info = self.view_model.get_current_image_info()
+        self.control_panel.update_image_info(**image_info)
+
     def load_folder(self):
         directory = filedialog.askdirectory()
         if not directory:
@@ -37,12 +42,12 @@ class MainView:
         self.update_status("Loading...")
 
         if self.view_model.get_option("run_auto_detection"):
-            # Use threading to run the auto-detection process
             threading.Thread(target=self.run_auto_detection, args=(directory,), daemon=True).start()
             self.finalize_directory_loading()
         else:
-            # Load directory without auto-detection
             self.load_directory_without_auto_detection(directory)
+
+        self.update_image_info()
 
     def export_analysis(self):
         try:
@@ -63,12 +68,14 @@ class MainView:
         self.control_panel.update_checkbox_state(self.view_model.is_object_lighter)
         self.image_canvas.display_image(image)
         self.update_status()
+        self.update_image_info()
 
     def next_image(self, event=None):
         image = self.view_model.cycle_next_file()
         self.control_panel.update_checkbox_state(self.view_model.is_object_lighter)
         self.image_canvas.display_image(image)
         self.update_status()
+        self.update_image_info()
 
     def on_image_click(self, x, y):
         result = self.view_model.on_image_click(x, y)
@@ -76,6 +83,7 @@ class MainView:
             self.image_canvas.display_image(result)
             self.update_status()
             self.control_panel.update_checkbox_state(self.view_model.is_object_lighter)
+            self.update_image_info()
 
     def update_status(self, message=None):
         if message:

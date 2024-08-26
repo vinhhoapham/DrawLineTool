@@ -110,12 +110,20 @@ def process_image(image_path, diameter=236):
 
     line_angle, contrast, blurriness = (None, None, None)
     if closest_line is not None:
-        line_angle, contrast, blurriness = calculate_image_property(original_image, closest_line, mid_x, mid_y,
-                                                                    diameter)
-        draw_line_and_text_from_auto_detection(original_color_image, closest_line, line_angle,
-                           contrast, blurriness, mid_x, mid_y, diameter)
-        draw_line_and_text_from_auto_detection(clustered_image, closest_line, line_angle, contrast, blurriness,
-                           radius, radius, diameter, color=(155, 155, 155))
+        line_angle, contrast, blurriness = calculate_image_property(
+            original_image, closest_line, mid_x, mid_y,
+            diameter
+        )
+
+        draw_line_and_text_from_auto_detection(
+            original_color_image, closest_line, line_angle,
+            contrast, blurriness, mid_x, mid_y, diameter
+        )
+
+        draw_line_and_text_from_auto_detection(
+            clustered_image, closest_line, line_angle, contrast, blurriness,
+            radius, radius, diameter, color=(155, 155, 155)
+        )
 
     cv2.circle(original_color_image, (mid_x, mid_y), radius, (0, 255, 0), 2)
 
@@ -130,7 +138,7 @@ def auto_detection(folder_path, progress_callback=None):
     os.makedirs(output_folder, exist_ok=True)
 
     results = dict()
-    image_files = [file for file in os.listdir(folder_path) if file.endswith((".JPG", ".jpeg"))]
+    image_files = [file for file in os.listdir(folder_path) if file.endswith((".JPG", ".jpeg", ".jpg", ".png"))]
     total_files = len(image_files)
     for index, filename in enumerate(image_files):
         image_path = os.path.join(folder_path, filename)

@@ -72,6 +72,16 @@ class DrawLineToolViewModel:
                     return self.cycle_next_file()
             return None
 
+    def get_current_image_info(self):
+        if self.model.get_current_file() not in self.model.analysis:
+            return {
+                'angle': None,
+                'contrast': None,
+                'blurriness': None
+            }
+
+        return self.model.analysis[self.model.get_current_file()]
+
     def reset_clicked_points(self):
         self.clicked_points.clear()
 

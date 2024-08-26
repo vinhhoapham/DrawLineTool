@@ -20,7 +20,7 @@ class DrawLineToolModel:
 
     def load_directory(self, directory,progress_callback=None):
         self.current_dir = directory
-        self.files = [file for file in os.listdir(directory) if file.endswith((".JPG", ".jpeg"))]
+        self.files = [file for file in os.listdir(directory) if file.endswith((".JPG", ".jpeg", ".jpg", ".png"))]
         self.current_file_index = 0
         if self.settings.get_option("run_auto_detection"):
             self.analysis, self.output_processed_folder = auto_detection(directory, progress_callback)
@@ -48,11 +48,13 @@ class DrawLineToolModel:
         current_image_path = os.path.join(self.current_dir, self.get_current_file())
         return PIL.Image.open(current_image_path).convert("L")
 
-    def get_analysis_for_current_image(self, line_points, is_object_lighter, diameter=236):
+    def get_analysis_for_current_image(self, line_points, is_object_lighter):
         if line_points is not None:
             image = self.get_current_image()
-            contrast, angle, blurriness, line_overlay_image = SingleImageAnalysis(image, line_points,
-                                                                                  is_object_lighter).get_analysis()
+            contrast, angle, blurriness, line_overlay_image = SingleImageAnalysis(
+                image, line_points,
+                is_object_lighter
+            ).get_analysis()
 
             self.analysis[self.get_current_file()] = {
                 'angle': angle,
