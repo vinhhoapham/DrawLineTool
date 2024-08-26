@@ -17,7 +17,7 @@ class DrawLineToolViewModel:
         return len(self.model.files)
 
     def get_image_to_display(self, force_to_display_original=False):
-        if (not force_to_display_original) and self.model.settings.get_option("run_auto_detection"):
+        if not force_to_display_original:
             original_filename = self.model.get_current_file()  # The original file name
             processed_filename = f"{os.path.splitext(original_filename)[0]}_processed.jpg"
             if processed_filename in os.listdir(self.model.output_processed_folder):

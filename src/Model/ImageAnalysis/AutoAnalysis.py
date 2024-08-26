@@ -7,6 +7,7 @@ from pathlib import Path
 import time
 from .SingleImageAnalysis import calculate_image_property_from_cartesian_coordinate
 
+
 def get_last_segment_of_path(path):
     return Path(path).name
 
@@ -70,15 +71,16 @@ def calculate_image_property(image, line, mid_x, mid_y, diameter):
     y1 = int(y0 + 10000 * (a))
     x2 = int(x0 - 10000 * (-b))
     y2 = int(y0 - 10000 * (a))
-    point1, point2 = (x1, y1), (x2,y2)
+    point1, point2 = (x1, y1), (x2, y2)
     adjusted_angle, contrast, blurriness = calculate_image_property_from_cartesian_coordinate(
         image=image, line_points=(point1, point2),
-        mid_x = mid_x, mid_y=mid_y, diameter=diameter, is_object_lighter= False
+        mid_x=mid_x, mid_y=mid_y, diameter=diameter, is_object_lighter=False
     )
     return adjusted_angle, contrast, blurriness
 
 
-def draw_line_and_text_from_auto_detection(image, line, angle, contrast, blurriness, mid_x, mid_y, diameter, color=(0, 0, 255)):
+def draw_line_and_text_from_auto_detection(image, line, angle, contrast, blurriness, mid_x, mid_y, diameter,
+                                           color=(0, 0, 255)):
     if line is not None:
         rho, theta = line[0]
         a, b = np.cos(theta), np.sin(theta)

@@ -69,9 +69,9 @@ class ControlPanelComponent(Frame):
         self.is_object_lighter_var.set(is_lighter)
 
     def update_image_info(self, blurriness=None, contrast=None, angle=None):
-        if blurriness is not None:
-            self.blurriness_value.config(text=f"{blurriness:.5f}")
-        if contrast is not None:
-            self.contrast_value.config(text=f"{contrast:.3f}")
-        if angle is not None:
-            self.angle_value.config(text=f"{angle:.3f}°")
+        blurriness_str = f"{blurriness:.5f}" if blurriness else "N/A"
+        contrast_str = f"{contrast:.3f}" if contrast else "N/A"
+        angle_str = f"{angle:.3f}" if angle else "N/A"
+        self.blurriness_value.config(text=blurriness_str)
+        self.contrast_value.config(text=contrast_str)
+        self.angle_value.config(text=angle_str)
