@@ -79,8 +79,11 @@ def calculate_image_property(image, line, mid_x, mid_y, diameter):
     return adjusted_angle, contrast, blurriness
 
 
-def draw_line_and_text_from_auto_detection(image, line, angle, contrast, blurriness, mid_x, mid_y, diameter,
-                                           color=(0, 0, 255)):
+def draw_line_and_text_from_auto_detection(
+        image, line, angle, contrast,
+        blurriness, mid_x, mid_y, diameter,
+        color=(0, 0, 255)
+):
     if line is not None:
         rho, theta = line[0]
         a, b = np.cos(theta), np.sin(theta)

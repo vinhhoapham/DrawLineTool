@@ -83,6 +83,7 @@ class DrawLineToolViewModel:
         return self.model.analysis[self.model.get_current_file()]
 
     def reset_clicked_points(self):
+        self.is_displaying_original_image = False
         self.clicked_points.clear()
 
     def reset_state(self):

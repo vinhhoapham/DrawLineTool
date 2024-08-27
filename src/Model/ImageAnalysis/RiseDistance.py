@@ -28,11 +28,13 @@ def edge_spread_function(image_array, line, radius):
         for row in range(mid_y - radius, mid_y + radius):
             if (col - mid_x) ** 2 + (row - mid_y) ** 2 < radius ** 2:
                 pixel = image_array[row, col]
-                distance = round_to_the_nearest_bin(distance_from_point_line(point=(col, row), line=line),
-                                                    sample_bins=2)
+                distance = round_to_the_nearest_bin(
+                    distance_from_point_line(point=(col, row), line=line),
+                    sample_bins=2
+                )
                 bins[distance].append(pixel)
 
-    esf = [(distance, np.mean(pixels)) for distance, pixels in bins.items()]
+    esf = [(distance, np.median(pixels)) for distance, pixels in bins.items()]
     return esf
 
 
@@ -41,12 +43,12 @@ def edge_model(x, a1, a3, sigma, a2):
 
 
 def rise_distance(image_array, line, radius):
-    slope, intercept = line
     esf = edge_spread_function(image_array, line, radius)
     distances, pixels = zip(*esf)
     distances = np.array(distances)
     pixels = np.array(pixels)
     initial_guesses = [np.max(pixels), np.mean(distances), 10, 10]
-    popt, _ = curve_fit(edge_model, distances, pixels, p0=initial_guesses, ftol=5e-5, xtol=5e-5)
+    popt, _ = curve_fit(edge_model, distances, pixels, p0=initial_guesses, ftol=5e-10, xtol=5e-10)
     sigma = abs(popt[2])
+
     return sigma
