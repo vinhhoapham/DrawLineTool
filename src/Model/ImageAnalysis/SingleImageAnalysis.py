@@ -11,7 +11,7 @@ def calculate_image_property_from_cartesian_coordinate(image, line_points, mid_x
 
     is_horizontal = abs(dx) > abs(dy)
 
-    slope = dy / dx if dx != 0 else float('inf')
+    slope = dy / (dx + 1e-9)
     intercept = y1 - slope * x1
 
     radius = diameter // 2
